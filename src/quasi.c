@@ -9,19 +9,21 @@
  * Seth M. Morton
  *******************************************************************/
 
-#include "constants.h"
 #include <math.h>
 #include <complex.h>
+#include "constants.h"
+#include "arraycontractions.h"
+#include "solvers.h"
 
 int quasi (int nlayers,
-           complex dielec[],
-           float mdie,
-           float rel_rad[][3],
-           float rad[],
-           float size_param,
-           float *extinct,
-           float *scat,
-           float *absorb)
+           double complex dielec[nlayers],
+           double mdie,
+           double rel_rad[nlayers][3],
+           double rad[3],
+           double size_param,
+           double *extinct,
+           double *scat,
+           double *absorb)
 {
 
     /*********************
@@ -29,7 +31,7 @@ int quasi (int nlayers,
      *********************/
 
     /* Too many layers for quasistatic approximatio */
-    if (!(nlayers < 2)) return 1;
+    if (!(nlayers <= 2)) return 1;
 
     /* Axes 2 and 3 must be identical */
     if (rad[1] != rad[2]) return 2;
@@ -39,98 +41,116 @@ int quasi (int nlayers,
         if (rel_rad[i][1] != rel_rad[i][2]) return 2;
     }
 
-    *extinct = 0.0;
-    *scat    = 0.0;
-    *absorb  = 0.0;
-
-    Complex(KINDR) :: die(3)
-    Complex(KINDR) :: num(3), den(3)   ! Numerator and denominator
-
-    Real(KINDR) :: tmp(nlayers,3)
-    Real(KINDR) :: rel_vol(nlayers) ! Relative volume of each layer
-    Real(KINDR) :: gf(3,nlayers)    ! Geometrical factors
-    Real(KINDR) :: radii(3)         ! Absolute radii
-    Real(KINDR) :: e                ! Eccentricity
-    Real(KINDR) :: g                ! A function of eccentricity
-
     /*******************************
      *Calculate the relative volumes
      *******************************/
 
-    tmp[0][:] = rel_rad[0][:];
-    rel_vol[0] = PRODUCT(tmp[0][:]);
+    double tmp[nlayers][3];
+    double rel_vol[nlayers];
+    for (int i = 0; i < nlayers; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (i == 0) {
+                tmp[i][j] = rel_rad[i][j];
+            } else {
+                tmp[i][j] = 0.0;
+            }
+        }
+    }
+    rel_vol[0] = prod(3, tmp[0]);
     for (int i = 1; i < nlayers; i++) {
-        tmp[i][:] = SUM(rel_rad[0:i][:], DIM=1);
-        rel_vol[i] = PRODUCT(tmp[i][:]) - PRODUCT(tmp[i-1][:]);
+        for (int j = 0; j < i+1; j++) {
+            for (int k = 0; k < 3; k++) {
+                tmp[i][k] += rel_rad[j][k];
+            }
+        }
+        rel_vol[i] = prod(3, tmp[i]) - prod(3, tmp[i-1]);
     }
 
     /***********************************************************
      * Calculate the goemetrical factors for each axis and layer
      ***********************************************************/
    
-    for {int ilayer = 0; ilayer < nlayers; i++) {
+    double gf[3][nlayers];
+    double radii[3];
+    for (int ilayer = 0; ilayer < nlayers; ilayer++) {
 
-!     Calculate the absolute radii
-      radii = rel_rad(ilayer,:) * rad
+        /* Calculate the absolute radii */
+        for (int i = 0; i < 3; i++) { radii[i] = rel_rad[ilayer][i] * rad[i]; }
 
-!     Determine if this is a prolate or oblate spheroid or a sphere
-      if (ABS(radii(1) - radii(2)) < 1E-3_KINDR) then
-!        Sphere
-         gf(:,ilayer) = THIRD
-      else if (radii(1) > radii(2)) then
-!        Prolate (cigar)
-!        Determine long axis
-         e = ONE - ( radii(2) / radii(1) )
-         gf(1,ilayer) = ( ( ONE - e ) / e )                           &
-                      * ( -ONE + ( ONE / ( 2 * SQRT(e) ) )            &
-                         * LOG(( ONE + SQRT(e) ) / ( ONE - SQRT(e) )) &
-                        )
-!        Set short axes.  Total must be 1, and the short are equal
-         gf(2:3,ilayer) = ( ONE - gf(1,ilayer) ) / TWO
-      else
-!        Oblate (pancake)
-!        Determine long axes
-         e = ONE - ( radii(1) / radii(2) )
-         g = SQRT(( ONE - e ) / e)
-         gf(2:3,ilayer) = ( g / ( TWO * e ) ) * ( ( PI / TWO ) - ATAN(g) ) &
-                        - ( g**2 / TWO )
-!        Set short axis.  Total must be 1, and the long are equal
-         gf(1,ilayer) = ONE - SUM(gf(2:3,ilayer))
-      end if
+        /* Determine if this is a prolate or oblate spheroid or a sphere */
+        if (fabs(radii[0] - radii[1]) < 1E-3) { /* Sphere */
+
+            /* All values are 1/3 */
+            for (int i = 0; i < 3; i++) { gf[i][ilayer] = 1.0 / 3.0; }
+
+        } else if (radii[0] > radii[1]) { /* Prolate (cigar) */
+
+            /* Determine long axis */
+            double e = 1.0 - ( radii[1] / radii[0] );
+            gf[0][ilayer] = ( ( 1.0 - e ) / e )
+                          * ( -1.0 + ( 1.0 / ( 2 * sqrt(e) ) )
+                             * log(( 1.0 + sqrt(e) ) / ( 1.0 - sqrt(e) ))
+                            );
+
+            /* Set short axes.  Total must be 1, and the short are equal */
+            gf[1][ilayer] = ( 1.0 - gf[0][ilayer] ) / 2.0;
+            gf[2][ilayer] = gf[1][ilayer];
+
+        } else { /* Oblate (pancake) */
+
+            /* Determine long axes */
+            double e = 1.0 - ( radii[0] / radii[1] );
+            double g = sqrt(( 1.0 - e ) / e);
+            gf[1][ilayer] = ( g / ( 2.0 * e ) ) * ( ( PI / 2.0 ) - atan(g) )
+                          - ( g*g / 2.0 );
+            gf[2][ilayer] = gf[1][ilayer];
+
+            /* Set short axis.  Total must be 1, and the long are equal */
+            gf[0][ilayer] = 1.0 - sum2range(3, nlayers, gf, 1, 2, ilayer, ilayer);
+
+        }
 
     }
 
-!  -------------------------------
-!  Determine the system dielectric
-!  -------------------------------
+   /*********************************
+    * Determine the system dielectric
+    *********************************/
 
-    complex die[3];
-!  One layer
-   if (nlayers == 1) then
-      die = ( dielec(1) - mdie ) / ( mdie + gf(:,1) * ( dielec(1) - mdie ) )
-!  Two layers
-   else if (nlayers == 2) then
-!     Numerator
-      num = ( dielec(1) - dielec(2) ) * ( gf(:,1) - rel_vol(1) * gf(:,2) )
-      num = ( dielec(2) - mdie ) * ( dielec(2) + num )
-      num = num + rel_vol(1) * dielec(2) * ( dielec(1) - dielec(2) )
-!     Denominator
-      den = ( dielec(1) - dielec(2) ) * ( gf(:,1) - rel_vol(1) * gf(:,2) )
-      den = ( dielec(2) + den  ) * ( mdie + ( dielec(2) - mdie ) * gf(:,2) )
-      den = den + rel_vol(1) * gf(:,2) * dielec(2) * ( dielec(1) - dielec(2) )
-!     The whole thing
-      die = num / den
-   end if
-!  Factor of three omitted above for ease
-    die = die / 3.0;
+    double complex die[3];
+    double complex a[2];
+    a[0] = dielec[0] - mdie;
+    a[1] = dielec[1] - mdie;
+    /* One layer */
+    if (nlayers == 1) {
+        for (int i = 0; i < 3; i++) {
+            die[i] = a[0] / ( 3.0 * ( mdie + gf[i][0] * a[0] ) );
+        }
+    /* Two layers */
+    } else if (nlayers == 2) {
+        /* Numerator and denominator */
+        double complex num[3], den[3], b = dielec[0] - dielec[1];
+        for (int i = 0; i < 3; i++) {
+            /* Numerator */
+            num[i] = a[1] 
+                   * ( dielec[1] + b * ( gf[i][0] - rel_vol[0] * gf[i][1] ) );
+            num[i] += rel_vol[0] * dielec[1] * b;
+            /* Denominator */
+            den[i] = ( dielec[1] + b * ( gf[i][0] - rel_vol[0] * gf[i][1] )  )
+                   * ( mdie + ( dielec[1] - mdie ) * gf[i][1] );
+            den[i] += rel_vol[0] * gf[i][1] * dielec[1] * b;
+            /* The whole thing */
+            die[i] = num[i] / ( 3.0 * den[i] );
+        }
+    }
 
-!  ------------------------
-!  Calculate the properties
-!  ------------------------
+    /**************************
+     * Calculate the properties
+     **************************/
 
-   absorb  = FOUR * size_param * AIMAG(SUM(die)) / THREE
-   scat    = ( EIGHT / THREE ) * size_param**4 * ABS(SUM(die) / THREE)**2
-   extinct = absorb + scat
+    *absorb  = 4.0 * size_param * cimag(csum(3, die)) / 3.0;
+    *scat    = cabs(csum(3, die) / 3.0);
+    *scat    = ( 8.0 / 3.0 ) * pow(size_param, 4.0) * ( *scat * *scat );
+    *extinct = *absorb + *scat;
 
     return 0;
 
