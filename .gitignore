@@ -10,3 +10,6 @@
 *.lai
 *.la
 *.a
+
+# From Qt GUI
+CMakeLists.txt.user
