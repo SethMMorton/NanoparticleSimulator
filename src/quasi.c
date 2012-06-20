@@ -15,15 +15,15 @@
 #include "arraycontractions.h"
 #include "solvers.h"
 
-int quasi (int nlayers,
-           double complex dielec[nlayers],
-           double mdie,
-           double rel_rad[nlayers][3],
-           double rad[3],
-           double size_param,
-           double *extinct,
-           double *scat,
-           double *absorb)
+int quasi (int nlayers,                    /* Number of layers */
+           double complex dielec[nlayers], /* Dielectric for the layers */
+           double mdie,                    /* Dielectric of external medium */
+           double rel_rad[nlayers][3],     /* Relative radii of the layers */
+           double rad[3],                  /* Radius if particle */
+           double size_param,              /* Size parameter */
+           double *extinct,                /* Extinction */
+           double *scat,                   /* Scattering */
+           double *absorb)                 /* Absorption */
 {
 
     /*********************
@@ -102,7 +102,7 @@ int quasi (int nlayers,
             double e = 1.0 - ( radii[0] / radii[1] );
             double g = sqrt(( 1.0 - e ) / e);
             gf[1][ilayer] = ( g / ( 2.0 * e ) ) * ( ( PI / 2.0 ) - atan(g) )
-                          - ( g*g / 2.0 );
+                          - ( SQR(g) / 2.0 );
             gf[2][ilayer] = gf[1][ilayer];
 
             /* Set short axis.  Total must be 1, and the long are equal */
@@ -149,7 +149,7 @@ int quasi (int nlayers,
 
     *absorb  = 4.0 * size_param * cimag(csum(3, die)) / 3.0;
     *scat    = cabs(csum(3, die) / 3.0);
-    *scat    = ( 8.0 / 3.0 ) * pow(size_param, 4.0) * ( *scat * *scat );
+    *scat    = ( 8.0 / 3.0 ) * pow(size_param, 4.0) * SQR(*scat);
     *extinct = *absorb + *scat;
 
     return 0;
