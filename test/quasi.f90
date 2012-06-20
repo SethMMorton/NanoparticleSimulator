@@ -8,34 +8,48 @@
 !
 ! Seth M. Morton
 !--------------------------------------------------------------------
-Subroutine quasi (nlayers, dielec, mdie, rel_rad, rad, size_param, &
-                  extinct, scat, absorb)
+!Subroutine quasi (nlayers, dielec, mdie, rel_rad, rad, size_param, &
+Subroutine quasi (nlayers, dielec, mdie, rr, rad, size_param, &
+                  extinct, scat, absorb) bind ( C, name="quasif" )
 
-   use Constants
+   use iso_c_binding
 
    Implicit None
 
-   Integer,        Intent(In)  :: nlayers            ! Number of layers
-   Complex(KINDR), Intent(In)  :: dielec(nlayers)    ! Dielectric of layers
-   Real(KINDR),    Intent(In)  :: mdie               ! Dielectric of medium
-   Real(KINDR),    Intent(In)  :: rel_rad(nlayers,3) ! Relative layer radius
-   Real(KINDR),    Intent(In)  :: rad(3)             ! Radius of each axis
-   Real(KINDR),    Intent(In)  :: size_param         ! Size parameter
-   Real(KINDR),    Intent(Out) :: extinct            ! Extiction
-   Real(KINDR),    Intent(Out) :: scat               ! Scattering
-   Real(KINDR),    Intent(Out) :: absorb             ! Absorption
+   Integer(C_INT),        Intent(In)  :: nlayers            ! Number of layers
+   Complex(C_DOUBLE_COMPLEX), Intent(In)  :: dielec(nlayers)    ! Dielectric of layers
+   Real(C_DOUBLE),    Intent(In)  :: mdie               ! Dielectric of medium
+   !Real(C_DOUBLE),    Intent(In)  :: rel_rad(nlayers,3) ! Relative layer radius
+   Real(C_DOUBLE),    Intent(In)  :: rr(nlayers*3) ! Relative layer radius
+   Real(C_DOUBLE),    Intent(In)  :: rad(3)             ! Radius of each axis
+   Real(C_DOUBLE),    Intent(In)  :: size_param         ! Size parameter
+   Real(C_DOUBLE),    Intent(Out) :: extinct            ! Extiction
+   Real(C_DOUBLE),    Intent(Out) :: scat               ! Scattering
+   Real(C_DOUBLE),    Intent(Out) :: absorb             ! Absorption
 
-   Complex(KINDR) :: die(3)
-   Complex(KINDR) :: num(3), den(3)   ! Numerator and denominator
+   Complex(C_DOUBLE_COMPLEX) :: die(3)
+   Complex(C_DOUBLE_COMPLEX) :: num(3), den(3)   ! Numerator and denominator
 
-   Real(KINDR) :: tmp(nlayers,3)
-   Real(KINDR) :: rel_vol(nlayers) ! Relative volume of each layer
-   Real(KINDR) :: gf(3,nlayers)    ! Geometrical factors
-   Real(KINDR) :: radii(3)         ! Absolute radii
-   Real(KINDR) :: e                ! Eccentricity
-   Real(KINDR) :: g                ! A function of eccentricity
+   Real(C_DOUBLE) :: tmp(nlayers,3)
+   Real(C_DOUBLE) :: rel_vol(nlayers) ! Relative volume of each layer
+   Real(C_DOUBLE) :: gf(3,nlayers)    ! Geometrical factors
+   Real(C_DOUBLE) :: radii(3)         ! Absolute radii
+   Real(C_DOUBLE) :: e                ! Eccentricity
+   Real(C_DOUBLE) :: g                ! A function of eccentricity
 
-   Integer     :: i, ilayer
+   Integer(C_INT)     :: i, ilayer
+
+   Real(C_DOUBLE), Parameter :: ZERO  = 0.0E0_C_DOUBLE
+   Real(C_DOUBLE), Parameter :: ONE   = 1.0E0_C_DOUBLE
+   Real(C_DOUBLE), Parameter :: TWO   = 2.0E0_C_DOUBLE
+   Real(C_DOUBLE), Parameter :: THREE = 3.0E0_C_DOUBLE
+   Real(C_DOUBLE), Parameter :: FOUR  = 4.0E0_C_DOUBLE
+   Real(C_DOUBLE), Parameter :: EIGHT = 8.0E0_C_DOUBLE
+   Real(C_DOUBLE), Parameter :: THIRD = ONE / THREE
+   Real(C_DOUBLE), Parameter :: PI    = 3.14159265358979323846_C_DOUBLE
+
+   Real(C_DOUBLE) :: rel_rad(nlayers,3)
+   rel_rad = RESHAPE(rr, (/nlayers, 3/))
 
    if (nlayers > 2) then
       write(*,*) 'Too many layers for quasistatic approximation'
@@ -79,7 +93,7 @@ Subroutine quasi (nlayers, dielec, mdie, rel_rad, rad, size_param, &
       radii = rel_rad(ilayer,:) * rad
 
 !     Determine if this is a prolate or oblate spheroid or a sphere
-      if (ABS(radii(1) - radii(2)) < 1E-3_KINDR) then
+      if (ABS(radii(1) - radii(2)) < 1E-3_C_DOUBLE) then
 !        Sphere
          gf(:,ilayer) = THIRD
       else if (radii(1) > radii(2)) then
