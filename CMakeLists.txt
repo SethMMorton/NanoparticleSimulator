@@ -32,6 +32,8 @@ SET(NPSIMEXE NPSim${BINARY_POSTFIX})
 # Add the headers
 SET(NPSim_HEADERS #${INC}/mainwindow.hpp
                   ${INC}/constants.h
+                  ${INC}/arraycontractions.h
+                  ${INC}/solvers.h
                   #${INC}/QScienceSpinBox.hpp
                   #${INC}/plot.hpp
                   #${INC}/inputfunction.hpp
@@ -53,6 +55,8 @@ SET(NPSim_CPP ${SRC}/main.cpp
 )
 
 SET(NPSim_C ${SRC}/quasi.c
+            ${SRC}/mie.c
+            ${SRC}/arraycontractions.c
 )
 
 ############################################

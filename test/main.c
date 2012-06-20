@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <math.h>
 #include <complex.h>
 #include "solvers.h"
@@ -88,6 +89,11 @@ int main(int argc, char *argv[])
     // Fortran version
     mief(&nlay, refrac_indx, rel_rad_sphere, &size_param, &extinct, &scat, &abs, &back, &radpress, &alb, &asym);
     printf("Mie F: Ext %.16f, Sca %.16f, Abs %.16f\n", extinct, scat, abs);
+
+    // Main solver test
+    int indx[NLAYERS] = { 0, 4 };
+    res = npsolve(NLAYERS, rad, rel_rad_spheroid, indx, MEDIUMDIE, false, false, &extinct, &scat, &abs);
+    printf("NPSolve: Ext %.16f, Sca %.16f, Abs %.16f\n", extinct, scat, abs);
 
     return 0;
 }
