@@ -50,20 +50,25 @@
 #include "drude_parameters.h"
 #include "solvers.h"
 
+/* Constant variables from the headers */
+extern const double wavelengths[NLAMBDA];
+extern const double drude_parameters[NMATERIAL][3];
+extern const double complex experimental_dielectrics[NMATERIAL][NLAMBDA];
+
 /* Drude function macro */
 #define DRUDE(x, p, g, s) (p*p / ( x * ( x + I * ( g + s ) ) ))
 
-int npsolve (int nlayers,                /* Number of layers */
-             double rad[3],              /* Radius of object */
-             double rel_rad[nlayers][3], /* Relative radii of layers */
-             int indx[nlayers],          /* The elemental index of layers */
-             double mrefrac,             /* Refractive index of medium */
-             bool size_correct,          /* Use size correction? */
-             bool cross_section,         /* Return cross-sections? */
-             double *sphere_rad,         /* The radius of equivalent sphere */
-             double extinct[NLAMBDA],    /* Extinction */
-             double scat[NLAMBDA],       /* Scattering */
-             double absorb[NLAMBDA]      /* Absorption */
+int npsolve (int nlayers,                    /* Number of layers */
+             double rad[XYZ],                /* Radius of object */
+             double rel_rad[MAXLAYERS][XYZ], /* Relative radii of layers */
+             int indx[MAXLAYERS],            /* Material index of layers */
+             double mrefrac,                 /* Refractive index of medium */
+             bool size_correct,              /* Use size correction? */
+             bool cross_section,             /* Return cross-sections? */
+             double *sphere_rad,             /* The radius of equivalent sphere */
+             double extinct[NLAMBDA],        /* Extinction */
+             double scat[NLAMBDA],           /* Scattering */
+             double absorb[NLAMBDA]          /* Absorption */
            )
 {
 
@@ -159,9 +164,9 @@ int npsolve (int nlayers,                /* Number of layers */
         }
         /* Calculate cross sections */
         if (cross_section) {
-            extinct[i] *= PI * SQR(sphere_rad);
-            scat[i]    *= PI * SQR(sphere_rad);
-            absorb[i]  *= PI * SQR(sphere_rad);
+            extinct[i] *= PI * SQR(*sphere_rad);
+            scat[i]    *= PI * SQR(*sphere_rad);
+            absorb[i]  *= PI * SQR(*sphere_rad);
         }
 
     }

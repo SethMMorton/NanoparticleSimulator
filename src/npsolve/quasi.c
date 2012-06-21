@@ -16,10 +16,10 @@
 #include "solvers.h"
 
 int quasi (int nlayers,                    /* Number of layers */
-           double complex dielec[nlayers], /* Dielectric for the layers */
+           double complex dielec[MAXLAYERS], /* Dielectric for the layers */
            double mdie,                    /* Dielectric of external medium */
-           double rel_rad[nlayers][3],     /* Relative radii of the layers */
-           double rad[3],                  /* Radius if particle */
+           double rel_rad[MAXLAYERS][XYZ],     /* Relative radii of the layers */
+           double rad[XYZ],                  /* Radius if particle */
            double size_param,              /* Size parameter */
            double *extinct,                /* Extinction */
            double *scat,                   /* Scattering */
@@ -45,10 +45,10 @@ int quasi (int nlayers,                    /* Number of layers */
      *Calculate the relative volumes
      *******************************/
 
-    double tmp[nlayers][3];
+    double tmp[nlayers][XYZ];
     double rel_vol[nlayers];
     for (int i = 0; i < nlayers; i++) {
-        for (int j = 0; j < 3; j++) {
+        for (int j = 0; j < XYZ; j++) {
             if (i == 0) {
                 tmp[i][j] = rel_rad[i][j];
             } else {
@@ -56,32 +56,32 @@ int quasi (int nlayers,                    /* Number of layers */
             }
         }
     }
-    rel_vol[0] = prod(3, tmp[0]);
+    rel_vol[0] = prod(XYZ, tmp[0]);
     for (int i = 1; i < nlayers; i++) {
         for (int j = 0; j < i+1; j++) {
-            for (int k = 0; k < 3; k++) {
+            for (int k = 0; k < XYZ; k++) {
                 tmp[i][k] += rel_rad[j][k];
             }
         }
-        rel_vol[i] = prod(3, tmp[i]) - prod(3, tmp[i-1]);
+        rel_vol[i] = prod(XYZ, tmp[i]) - prod(XYZ, tmp[i-1]);
     }
 
     /***********************************************************
      * Calculate the goemetrical factors for each axis and layer
      ***********************************************************/
    
-    double gf[3][nlayers];
-    double radii[3];
+    double gf[XYZ][nlayers];
+    double radii[XYZ];
     for (int ilayer = 0; ilayer < nlayers; ilayer++) {
 
         /* Calculate the absolute radii */
-        for (int i = 0; i < 3; i++) { radii[i] = rel_rad[ilayer][i] * rad[i]; }
+        for (int i = 0; i < XYZ; i++) { radii[i] = rel_rad[ilayer][i] * rad[i]; }
 
         /* Determine if this is a prolate or oblate spheroid or a sphere */
         if (fabs(radii[0] - radii[1]) < 1E-3) { /* Sphere */
 
             /* All values are 1/3 */
-            for (int i = 0; i < 3; i++) { gf[i][ilayer] = 1.0 / 3.0; }
+            for (int i = 0; i < XYZ; i++) { gf[i][ilayer] = 1.0 / 3.0; }
 
         } else if (radii[0] > radii[1]) { /* Prolate (cigar) */
 
@@ -106,7 +106,7 @@ int quasi (int nlayers,                    /* Number of layers */
             gf[2][ilayer] = gf[1][ilayer];
 
             /* Set short axis.  Total must be 1, and the long are equal */
-            gf[0][ilayer] = 1.0 - sum2range(3, nlayers, gf, 1, 2, ilayer, ilayer);
+            gf[0][ilayer] = 1.0 - sum2range(XYZ, nlayers, gf, 1, 2, ilayer, ilayer);
 
         }
 
@@ -116,20 +116,20 @@ int quasi (int nlayers,                    /* Number of layers */
     * Determine the system dielectric
     *********************************/
 
-    double complex die[3];
+    double complex die[XYZ];
     double complex a[2];
     a[0] = dielec[0] - mdie;
     a[1] = dielec[1] - mdie;
     /* One layer */
     if (nlayers == 1) {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < XYZ; i++) {
             die[i] = a[0] / ( 3.0 * ( mdie + gf[i][0] * a[0] ) );
         }
     /* Two layers */
     } else if (nlayers == 2) {
         /* Numerator and denominator */
-        double complex num[3], den[3], b = dielec[0] - dielec[1];
-        for (int i = 0; i < 3; i++) {
+        double complex num[XYZ], den[XYZ], b = dielec[0] - dielec[1];
+        for (int i = 0; i < XYZ; i++) {
             /* Numerator */
             num[i] = a[1] 
                    * ( dielec[1] + b * ( gf[i][0] - rel_vol[0] * gf[i][1] ) );
@@ -147,8 +147,8 @@ int quasi (int nlayers,                    /* Number of layers */
      * Calculate the properties
      **************************/
 
-    *absorb  = 4.0 * size_param * cimag(csum(3, die)) / 3.0;
-    *scat    = cabs(csum(3, die) / 3.0);
+    *absorb  = 4.0 * size_param * cimag(csum(XYZ, die)) / 3.0;
+    *scat    = cabs(csum(XYZ, die) / 3.0);
     *scat    = ( 8.0 / 3.0 ) * pow(size_param, 4.0) * SQR(*scat);
     *extinct = *absorb + *scat;
 

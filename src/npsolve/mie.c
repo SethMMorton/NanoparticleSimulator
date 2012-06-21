@@ -18,8 +18,8 @@
 #include "mie_helpers.h"
 
 int mie (int nlayers,                         /* Number of layers */
-         double complex refrac_indx[nlayers], /* Refractive index of layers */
-         double rel_rad[nlayers],             /* Relative radii of layers */
+         double complex refrac_indx[MAXLAYERS], /* Refractive index of layers */
+         double rel_rad[MAXLAYERS],             /* Relative radii of layers */
          double size_param,                   /* Size parameter */
          double *extinct,                     /* Extinction */
          double *scat,                        /* Scattering */
