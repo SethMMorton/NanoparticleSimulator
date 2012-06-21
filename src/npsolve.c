@@ -60,6 +60,7 @@ int npsolve (int nlayers,                /* Number of layers */
              double mrefrac,             /* Refractive index of medium */
              bool size_correct,          /* Use size correction? */
              bool cross_section,         /* Return cross-sections? */
+             double *sphere_rad,         /* The radius of equivalent sphere */
              double extinct[NLAMBDA],    /* Extinction */
              double scat[NLAMBDA],       /* Scattering */
              double absorb[NLAMBDA]      /* Absorption */
@@ -81,11 +82,10 @@ int npsolve (int nlayers,                /* Number of layers */
         lmie = true;
 
     /* Calculate radius of a sphere with an equivalent volume */
-    double sphere_rad;
     if (lmie)
-        sphere_rad = rad[0];
+        *sphere_rad = rad[0];
     else
-        sphere_rad = pow(prod(3, rad), ( 1.0 / 3.0 ));
+        *sphere_rad = pow(prod(3, rad), ( 1.0 / 3.0 ));
 
     /***************************************************
      * Loop over each wavelength to calculate properties
@@ -94,7 +94,7 @@ int npsolve (int nlayers,                /* Number of layers */
     for (int i = 0; i < NLAMBDA; i++) {
 
         /* Determine size parameter */
-        double size_param = 2.0 * PI * sphere_rad * mrefrac / wavelengths[i];
+        double size_param = 2.0 * PI * (*sphere_rad) * mrefrac / wavelengths[i];
 
         /* Skip if size_param is too small */
         if (size_param < 0.1E-6)
@@ -123,7 +123,7 @@ int npsolve (int nlayers,                /* Number of layers */
                 /* Use the drude model to size-correct experimental data */
                 dielec[j] = dielec[j]
                           - DRUDE(om, pf, gm, 0.0)
-                          + DRUDE(om, pf, gm, MPERS2EV(sc, sphere_rad));
+                          + DRUDE(om, pf, gm, MPERS2EV(sc, *sphere_rad));
 
             }
 

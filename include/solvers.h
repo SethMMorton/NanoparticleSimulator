@@ -13,6 +13,7 @@ int npsolve (int nlayers,
              double mrefrac,
              bool size_correct,
              bool cross_section,
+             double *sphere_rad,
              double extinct[NLAMBDA],
              double scat[NLAMBDA],
              double absorb[NLAMBDA]
