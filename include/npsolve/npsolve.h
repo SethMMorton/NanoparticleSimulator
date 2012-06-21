@@ -1,10 +1,24 @@
-#ifndef MATERIAL_INDEX_H
-#define MATERIAL_INDEX_H
+#ifndef NPSOLVE_H
+#define NPSOLVE_H
 
-#include <string.h>
+#include <stdbool.h>
 #include "constants.h"
 
+/* Container to hold all spectra results */
+typedef struct spectra_containers *Spectra;
+
+int npsolve (int nlayers,
+             double rad[XYZ],
+             double rel_rad[MAXLAYERS][XYZ],
+             int indx[MAXLAYERS],
+             double mrefrac,
+             bool size_correct,
+             Spectra spectra;
+           );
+
 /* Function to return the index of a material */
+int material_index(char *material);
+
 int material_index(char *material) {
 
     /* The array defining the known materials  */
@@ -61,7 +75,7 @@ int material_index(char *material) {
     };
 
     /* Run over the known materials, comparing them to the given.
-       Return index if found, otherwise return -1 */
+     * Return index if found, otherwise return -1 */
     for (int i = 0; i < NMATERIAL; i++) {
         if (strcmp(material, mindx[i]) == 0)
             return i;
@@ -70,4 +84,4 @@ int material_index(char *material) {
 
 }
 
-#endif // MATERIAL_INDEX_H
+#endif // NPSOLVE_H
