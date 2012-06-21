@@ -70,5 +70,4 @@ int material_index(char *material) {
 
 }
 
-
 #endif // MATERIAL_INDEX_H
