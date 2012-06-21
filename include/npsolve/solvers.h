@@ -7,9 +7,9 @@
 
 /* Main solver */
 int npsolve (int nlayers,
-             double rad[3],
-             double rel_rad[nlayers][3],
-             int indx[nlayers],
+             double rad[XYZ],
+             double rel_rad[MAXLAYERS][XYZ],
+             int indx[MAXLAYERS],
              double mrefrac,
              bool size_correct,
              bool cross_section,
@@ -21,10 +21,10 @@ int npsolve (int nlayers,
 
 /* Quasistatic approx */
 int quasi (int nlayers,
-           double complex dielec[nlayers],
+           double complex dielec[MAXLAYERS],
            double mdie,
-           double rel_rad[nlayers][3],
-           double rad[3],
+           double rel_rad[MAXLAYERS][XYZ],
+           double rad[XYZ],
            double size_param,
            double *extinct,
            double *scat,
@@ -33,8 +33,8 @@ int quasi (int nlayers,
 
 /* Mie theory */
 int mie (int nlayers,
-         double complex refrac_indx[nlayers],
-         double rel_rad[nlayers],
+         double complex refrac_indx[MAXLAYERS],
+         double rel_rad[MAXLAYERS],
          double size_param,
          double *extinct,
          double *scat,

@@ -4,6 +4,8 @@
 /* Program parameters */
 #define NLAMBDA 800
 #define NMATERIAL 49
+#define MAXLAYERS 3
+#define XYZ 3
 
 /* Physical Constants */
 #define PI 3.14159265358979323846
