@@ -43,12 +43,12 @@
 #include <math.h>
 #include <complex.h>
 #include <stdbool.h>
-#include "constants.h"
-#include "arraycontractions.h"
-#include "wavelengths.h"
-#include "experimental_dielectrics.h"
-#include "drude_parameters.h"
-#include "solvers.h"
+#include "npsolve/constants.h"
+#include "npsolve/arraycontractions.h"
+#include "npsolve/wavelengths.h"
+#include "npsolve/experimental_dielectrics.h"
+#include "npsolve/drude_parameters.h"
+#include "npsolve/solvers.h"
 
 /* Constant variables from the headers */
 extern const double wavelengths[NLAMBDA];

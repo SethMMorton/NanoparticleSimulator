@@ -1,7 +1,7 @@
 #include <math.h>
 #include <complex.h>
-#include "constants.h"
-#include "mie_helpers.h"
+#include "npsolve/constants.h"
+#include "npsolve/mie_helpers.h"
 
 /***************************************************
  *  NM-auxiliary function for AA1 & BESSEL

@@ -12,10 +12,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <complex.h>
-#include "constants.h"
-#include "arraycontractions.h"
-#include "solvers.h"
-#include "mie_helpers.h"
+#include "npsolve/constants.h"
+#include "npsolve/arraycontractions.h"
+#include "npsolve/solvers.h"
+#include "npsolve/mie_helpers.h"
 
 int mie (int nlayers,                         /* Number of layers */
          double complex refrac_indx[MAXLAYERS], /* Refractive index of layers */

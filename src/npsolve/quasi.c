@@ -11,9 +11,9 @@
 
 #include <math.h>
 #include <complex.h>
-#include "constants.h"
-#include "arraycontractions.h"
-#include "solvers.h"
+#include "npsolve/constants.h"
+#include "npsolve/arraycontractions.h"
+#include "npsolve/solvers.h"
 
 int quasi (int nlayers,                    /* Number of layers */
            double complex dielec[MAXLAYERS], /* Dielectric for the layers */

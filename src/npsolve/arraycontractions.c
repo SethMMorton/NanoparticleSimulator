@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "arraycontractions.h"
+#include "npsolve/arraycontractions.h"
 
 /***************************
  * Functions to sum an array
