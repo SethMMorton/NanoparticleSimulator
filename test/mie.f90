@@ -49,7 +49,7 @@ Subroutine mie (nlayers, refrac_indx, rel_rad, size_param, &
 
    Real(C_DOUBLE)    :: ax
    Real(C_DOUBLE)    :: ari,ari1
-   Integer(C_INT)        :: i, j
+   Integer(C_INT)        :: i
    Integer(C_INT)        :: num, num1, num2
 
    Real(C_DOUBLE), Parameter :: ZERO  = 0.0E0_C_DOUBLE

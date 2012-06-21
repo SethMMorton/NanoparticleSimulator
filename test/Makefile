@@ -11,19 +11,19 @@ test: main.c quasif.o quasic.o mief.o miec.o arraycontractions.o mie_helpers.o n
 	./test
 	rm test *.o
 
-npsolve.o: ../src/npsolve.c miec.o quasic.o arraycontractions.o
+npsolve.o: ../src/npsolve/npsolve.c miec.o quasic.o arraycontractions.o
 	${CC} ${CCFLAGS} -c $< -o $@
 
-miec.o: ../src/mie.c arraycontractions.o mie_helpers.o
+miec.o: ../src/npsolve/mie.c arraycontractions.o mie_helpers.o
 	${CC} ${CCFLAGS} -c $< -o $@
 
-quasic.o: ../src/quasi.c arraycontractions.o
+quasic.o: ../src/npsolve/quasi.c arraycontractions.o
 	${CC} ${CCFLAGS} -c $< -o $@
 
-mie_helpers.o: ../src/mie_helpers.c
+mie_helpers.o: ../src/npsolve/mie_helpers.c
 	${CC} ${CCFLAGS} -c $< -o $@
 
-arraycontractions.o: ../src/arraycontractions.c
+arraycontractions.o: ../src/npsolve/arraycontractions.c
 	${CC} ${CCFLAGS} -c $< -o $@
 
 mief.o: mie.f90

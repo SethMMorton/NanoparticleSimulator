@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <math.h>
 #include <complex.h>
-#include "solvers.h"
-#include "constants.h"
+#include "npsolve/solvers.h"
+#include "npsolve/constants.h"
 
 #define NLAYERS 2
 #define XYZ 3
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     // Main solver test
     int indx[NLAYERS] = { 0, 4 };
-    res = npsolve(NLAYERS, rad, rel_rad_spheroid, indx, MEDIUMDIE, false, false, &extinct, &scat, &abs);
+    res = npsolve(NLAYERS, rad, rel_rad_spheroid, indx, MEDIUMDIE, false, &extinct, &scat, &abs);
     printf("NPSolve: Ext %.16f, Sca %.16f, Abs %.16f\n", extinct, scat, abs);
 
     return 0;
