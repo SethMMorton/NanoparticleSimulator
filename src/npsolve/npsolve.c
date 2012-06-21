@@ -4,8 +4,9 @@
 *------------------------------------------------------------------
 *  Input data  :
 *   nlayers    : number of layers
-*   layer_rad  : the radius of each layer (from inner surface
+*   rad        : the radius of each layer (from inner surface
 *                                          to outer surface)
+*   rel_rad    : The relative 
 *   lambda     : the wavelength limits to scan over
 *   nlambda    : number of wavelengths to calculate between limits
 *   mrefrac    : refractive index of surrounding medium (default = 1)
@@ -49,6 +50,22 @@
 #include "npsolve/experimental_dielectrics.h"
 #include "npsolve/drude_parameters.h"
 #include "npsolve/solvers.h"
+#include "npsolve/npsolve.h"
+
+/* Container to hold the three spectra types */
+typedef struct {
+    double extinct[NLAMBDA];
+    double scat[NLAMBDA];
+    double absorb[NLAMBDA];
+} SpectraTypes;
+
+/* Container to hold all spectra results */
+struct spectra_containers {
+    SpectraTypes efficiencies;
+    SpectraTypes cross_sections;
+    SpectraTypes absorptivity;
+    SpectraTypes solution;
+};
 
 /* Constant variables from the headers */
 extern const double wavelengths[NLAMBDA];
@@ -64,21 +81,12 @@ int npsolve (int nlayers,                    /* Number of layers */
              int indx[MAXLAYERS],            /* Material index of layers */
              double mrefrac,                 /* Refractive index of medium */
              bool size_correct,              /* Use size correction? */
-             bool cross_section,             /* Return cross-sections? */
-             double *sphere_rad,             /* The radius of equivalent sphere */
-             double extinct[NLAMBDA],        /* Extinction */
-             double scat[NLAMBDA],           /* Scattering */
-             double absorb[NLAMBDA]          /* Absorption */
+             Spectra spectra;                /* Results */
            )
 {
 
     /* Dielectric function and refractive index */
     double complex dielec[nlayers], refrac_indx[nlayers];
-
-    /* Relative radius for sphere */
-    double srrad[nlayers];
-    for (int i = 0; i < nlayers; i++)
-        srrad[i] = rel_rad[i][0];
 
     /* If the second or third components are negative, it is a sphere
        and thus Mie theory is used.  Otherwise, quasistatic is used. */
@@ -87,6 +95,7 @@ int npsolve (int nlayers,                    /* Number of layers */
         lmie = true;
 
     /* Calculate radius of a sphere with an equivalent volume */
+    double *sphere_rad;
     if (lmie)
         *sphere_rad = rad[0];
     else
@@ -143,10 +152,11 @@ int npsolve (int nlayers,                    /* Number of layers */
         }
 
         /* Solve using the appropriate inputs and theory */
-        extinct[i] = 0.0;
-        scat[i]    = 0.0;
-        absorb[i]  = 0.0;
         if (lmie) {
+            /* Relative radius for sphere */
+            double srrad[nlayers];
+            for (int i = 0; i < nlayers; i++)
+                srrad[i] = rel_rad[i][0];
             double backscat, rad_pressure, albedo, asymmetry;
             int retval = mie(nlayers, refrac_indx, srrad, size_param,
                              &extinct[i], &scat[i], &absorb[i],

@@ -5,20 +5,6 @@
 #include <complex.h>
 #include "constants.h"
 
-/* Main solver */
-int npsolve (int nlayers,
-             double rad[XYZ],
-             double rel_rad[MAXLAYERS][XYZ],
-             int indx[MAXLAYERS],
-             double mrefrac,
-             bool size_correct,
-             bool cross_section,
-             double *sphere_rad,
-             double extinct[NLAMBDA],
-             double scat[NLAMBDA],
-             double absorb[NLAMBDA]
-           );
-
 /* Quasistatic approx */
 int quasi (int nlayers,
            double complex dielec[MAXLAYERS],
