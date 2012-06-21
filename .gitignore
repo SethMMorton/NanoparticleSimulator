@@ -13,3 +13,4 @@
 
 # From Qt GUI
 CMakeLists.txt.user
+qtcreator*
