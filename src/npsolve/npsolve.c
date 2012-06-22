@@ -2,36 +2,17 @@
 *   Calculations of extinction, scattering, absorption, etc.
 *   efficiency factors for n-layered spheres.
 *------------------------------------------------------------------
-*  Input data  :
-*   nlayers    : number of layers
-*   rad        : the radius of each layer (from inner surface
-*                                          to outer surface)
-*   rel_rad    : The relative 
-*   lambda     : the wavelength limits to scan over
-*   nlambda    : number of wavelengths to calculate between limits
-*   mrefrac    : refractive index of surrounding medium (default = 1)
-*   lexact     : use exact theory to calculate (default = true)
-*   drude      : the drude function parameters (optional)
-*                1 = bound dielectric
-*                2 = plasma frequency
-*                3 = fermi velocity
-*                4 = inverse lifetime (gamma)
-*   nexp       : number of experimental wavelengths (optional)
-*   expdie     : the experimental dielectric constant (optional)
-*                At least one of drude and expdie must be given.
-*                If both expdie and drude are given, drude is used
-*                as a correction term for expdie.
-*                1 = wavelength (nm)
-*                2 = real dielelectric
-*                3 = imaginary dielelectric
-*                4 = real second derivative (for cubic interpolation)
-*                5 = imaginary second derivative
+*  Input data    :
+*   nlayers      : number of layers
+*   rad          : the radius of each layer (from inner surface
+*                                            to outer surface)
+*   rel_rad      : The relative 
+*   mrefrac      : refractive index of surrounding medium
+*   indx         : The index of the material for each later
+*   size_correct : Whether to size correct dielectric or not
 *------------------------------------------------------------------
-*  Output data :
-*     wavelengths  : the wavelengths calculated
-*     extinct  : extinction efficiency (Qext)
-*     scat     : scattering efficiency (Qsca)
-*     absorb   : absorption efficiency (Qabs)
+*  Output data   :
+*   spectra      : A collection of all forms of the spectra
 *------------------------------------------------------------------
 * Recursive algorithms of Wu & Wang (Radio Sci. 26, 1393, 1991)
 * created by N.V. Voshchinnikov
@@ -46,11 +27,13 @@
 #include <stdbool.h>
 #include "npsolve/constants.h"
 #include "npsolve/arraycontractions.h"
-#include "npsolve/wavelengths.h"
-#include "npsolve/experimental_dielectrics.h"
-#include "npsolve/drude_parameters.h"
 #include "npsolve/solvers.h"
 #include "npsolve/npsolve.h"
+
+#define NM2EV(x) (1239.0 / x)
+#define MPERS2EV(x, r) (x * HBAR / ( r * 1.0E-9 ))
+#define SQR(x) ((x) * (x))
+#define CMPLX(r, i) ((r) + I*(i))
 
 /* Container to hold the three spectra types */
 typedef struct {
@@ -67,7 +50,7 @@ struct spectra_containers {
     SpectraTypes solution;
 };
 
-/* Constant variables from the headers */
+/* Constant variables source files of the same name */
 extern const double wavelengths[NLAMBDA];
 extern const double drude_parameters[NMATERIAL][3];
 extern const double complex experimental_dielectrics[NMATERIAL][NLAMBDA];
