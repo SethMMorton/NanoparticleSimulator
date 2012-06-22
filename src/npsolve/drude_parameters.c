@@ -1,7 +1,4 @@
-#ifndef DRUDE_PARAMETERS_H
-#define DRUDE_PARAMETERS_H
-
-#include "constants.h"
+#include "npsolve/constants.h"
 
 /* The array defining the known materials  */
 const double drude_parameters[NMATERIAL][3] = {
@@ -55,5 +52,3 @@ const double drude_parameters[NMATERIAL][3] = {
     { 0.0, 0.0, 0.0 },  /* ZnSe */
     { 0.0, 0.0, 0.0 },  /* ZnTe */
 };
-
-#endif // DRUDE_PARAMETERS_H

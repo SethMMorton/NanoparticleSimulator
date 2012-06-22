@@ -1,8 +1,7 @@
-#ifndef EXPERIMENTAL_DIELECTRICS_H
-#define EXPERIMENTAL_DIELECTRICS_H
-
 #include <complex.h>
-#include "constants.h"
+#include "npsolve/constants.h"
+
+#define CMPLX(r, i) ((r) + I*(i))
 
 const double complex experimental_dielectrics[NMATERIAL][NLAMBDA] =
 {
@@ -19705,6 +19704,3 @@ const double complex experimental_dielectrics[NMATERIAL][NLAMBDA] =
     CMPLX(  7.724473,   0.000000), CMPLX(  7.722219,   0.000000)
   }
 };
-
-#endif // EXPERIMENTAL_DIELECTRICS_H
-

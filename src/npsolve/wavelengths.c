@@ -1,5 +1,4 @@
-#ifndef WAVELENGTHS_H
-#define WAVELENGTHS_H
+#include "npsolve/constants.h"
 
 const double wavelengths[NLAMBDA] = 
       { 200.0,  201.0,  202.0,  203.0,  204.0,  205.0,  206.0,  207.0,  208.0,
@@ -91,5 +90,3 @@ const double wavelengths[NLAMBDA] =
         974.0,  975.0,  976.0,  977.0,  978.0,  979.0,  980.0,  981.0,  982.0,
         983.0,  984.0,  985.0,  986.0,  987.0,  988.0,  989.0,  990.0,  991.0,
         992.0,  993.0,  994.0,  995.0,  996.0,  997.0,  998.0,  999.0 };
-
-#endif // WAVELENGTHS_H

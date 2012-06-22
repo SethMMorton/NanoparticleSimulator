@@ -1,7 +1,4 @@
-#ifndef STANDARD_COLOR_MATCHING_H
-#define STANDARD_COLOR_MATCHING_H
-
-#include "constants.h"
+#include "npsolve/constants.h"
 
 /******************************************************************************
  * These color matching data sets are from the International Commision on
@@ -11,7 +8,7 @@
  * ICCMat is the matrix used convert from spectrum to RGB values.
  *****************************************************************************/
 
-const struct {
+const struct cie {
     double X[NLAMBDA];
     double Y[NLAMBDA];
     double Z[NLAMBDA];
@@ -832,5 +829,3 @@ const double ICCMat[3][3] = {
                               { -0.9692,  1.8760,  0.0416 },
                               {  0.0556, -0.2040,  1.0570 }
                             };
-
-#endif // STANDARD_COLOR_MATCHING_H
