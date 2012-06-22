@@ -15,6 +15,8 @@
 #include "npsolve/arraycontractions.h"
 #include "npsolve/solvers.h"
 
+#define SQR(x) ((x) * (x))
+
 int quasi (int nlayers,                    /* Number of layers */
            double complex dielec[MAXLAYERS], /* Dielectric for the layers */
            double mdie,                    /* Dielectric of external medium */
