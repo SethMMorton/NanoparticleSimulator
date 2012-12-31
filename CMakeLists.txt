@@ -12,8 +12,6 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # DEFINE WHAT IS NEEDED TO COMPILE
 ##################################
 
-# Make sure C compiler supports C99
-INCLUDE(${CMAKE_MODULE_PATH}/FindC99Flag.cmake)
 # We need QT
 FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtSvg)
 INCLUDE(${QT_USE_FILE})
@@ -33,36 +31,8 @@ SET(LIB lib)
 INCLUDE_DIRECTORIES(${INC}
                     ${QWT_INCLUDE_DIR})
 
-###########################################
-# DEFINE HOW TO COMPILE THE NPSOLVE LIBRARY
-###########################################
-
-# Name of NPSolve library
-SET(NPSOLVELIB ${LIB}/NPSolve)
-
-# Add the headers and source for the NPSolve library
-SET(NPSolve_HEADERS ${INC}/npsolve/arraycontractions.h
-                    ${INC}/npsolve/constants.h
-                    ${INC}/npsolve/drude_parameters.h
-                    ${INC}/npsolve/experimental_dielectrics.h
-                    ${INC}/npsolve/mie_helpers.h
-                    ${INC}/npsolve/material_index.h
-                    ${INC}/npsolve/solvers.h
-                    ${INC}/npsolve/standard_color_matching.h
-                    ${INC}/npsolve/wavelengths.h
-)
-
-SET(NPSolve_SRC ${SRC}/npsolve/arraycontractions.c
-                ${SRC}/npsolve/mie.c
-                ${SRC}/npsolve/mie_helpers.c
-                ${SRC}/npsolve/npsolve.c
-                ${SRC}/npsolve/quasi.c
-)
-
-# Compile NPSolve into a library
-ADD_LIBRARY(${NPSOLVELIB} SHARED ${NPSolve_SRC} ${NPSolve_HEADERS})
-SET_TARGET_PROPERTIES (${NPSOLVELIB} PROPERTIES
-                       COMPILE_FLAGS "${C99_C_FLAGS}")
+# The linker should look for libraries in lib
+LINK_DIRECTORIES(${LIB})
 
 ############################################
 # DEFINE HOW TO COMPILE THE NPSIM EXECUTABLE
@@ -72,7 +42,7 @@ SET_TARGET_PROPERTIES (${NPSOLVELIB} PROPERTIES
 SET(NPSIMEXE NPSim${BINARY_POSTFIX})
 
 # Add the headers and source files for the main program
-SET(NPSim_HEADERS #${INC}/mainwindow.hpp
+SET(NPSim_HEADERS ${INC}/mainwindow.hpp
                   ${INC}/nanoparticle.hpp
                   #${INC}/QScienceSpinBox.hpp
                   #${INC}/plot.hpp
@@ -84,7 +54,7 @@ SET(NPSim_HEADERS #${INC}/mainwindow.hpp
 
 SET(NPSim_SRC ${SRC}/main.cpp
               ${SRC}/nanoparticle.cpp
-              #${SRC}/mainwindow.cpp
+              ${SRC}/mainwindow.cpp
               #${SRC}/QScienceSpinBox.cpp
               #${SRC}/plot.cpp
               #${SRC}/inputfunction.cpp
@@ -108,9 +78,9 @@ SET(NPSim_MOC_HEADERS #${INC}/mainwindow.hpp
 QT4_WRAP_CPP(NPSim_MOC ${NPSim_MOC_HEADERS})
 
 # Add a definition to differentiate versions of QWT
-IF (QWT_SAMPLES)
-    ADD_DEFINITIONS(-DQWT_SAMPLES)
-ENDIF (QWT_SAMPLES)
+IF (QWT_6_DETECTED)
+    ADD_DEFINITIONS(-DQWT_6_DETECTED)
+ENDIF (QWT_6_DETECTED)
 
 # Define the files to be used to make the executable
 ADD_EXECUTABLE(${NPSIMEXE}
